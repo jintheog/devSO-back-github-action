@@ -1,5 +1,6 @@
 package com.example.devso.controller;
 
+import com.example.devso.dto.request.KakaoLoginRequest;
 import com.example.devso.dto.request.LoginRequest;
 import com.example.devso.dto.request.SignupRequest;
 import com.example.devso.dto.response.ApiResponse;
@@ -49,4 +50,20 @@ public class AuthController {
         UserResponse response = authService.getMe(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @Operation(summary = "카카오 로그인")
+    @PostMapping("/kakao")
+    public ResponseEntity<ApiResponse<TokenResponse>> kakaoLogin(
+            @Valid @RequestBody KakaoLoginRequest request
+    ){
+        TokenResponse response = authService.kakaoLogin(request.getCode());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout() {
+        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
+    }
+
 }

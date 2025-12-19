@@ -27,13 +27,13 @@ public class User extends BaseEntity{
     private Role role;
 
 
-    @Column(nullable = false, length = 30)
+    @Column( length = 30)
     private String phone;
 
     @Column(length = 500)
     private String bio;
 
-    @Column(unique = true)
+
     private String email;
 
     private String profileImageUrl;
