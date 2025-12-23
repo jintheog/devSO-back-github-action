@@ -1,6 +1,6 @@
 package com.example.devso.controller.chat;
 
-import com.example.devso.Security.CustomUserDetails;
+import com.example.devso.security.CustomUserDetails;
 import com.example.devso.dto.request.chat.ChatMessageRequest;
 import com.example.devso.dto.response.chat.ChatMessageResponse;
 import com.example.devso.entity.chat.ChatMessage;
