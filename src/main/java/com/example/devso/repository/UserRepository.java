@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -21,5 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT * FROM users WHERE provider = :provider AND provider_id = :providerId", nativeQuery = true)
     Optional<User> findByProviderAndProviderId(@Param("provider")AuthProvider provider, @Param("providerId")String providerId);
 
-
+    @Query("SELECT u FROM User u WHERE (u.username LIKE %:query% OR u.name LIKE %:query%) AND u.id <> :excludeUserId")
+    List<User> searchUsers(@Param("query") String query, @Param("excludeUserId") Long excludeUserId);
 }

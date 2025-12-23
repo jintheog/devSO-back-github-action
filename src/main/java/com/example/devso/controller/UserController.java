@@ -5,6 +5,7 @@ import com.example.devso.dto.request.PasswordChangeRequest;
 import com.example.devso.dto.request.UserUpdateRequest;
 import com.example.devso.dto.response.ApiResponse;
 import com.example.devso.dto.response.UserProfileResponse;
+import com.example.devso.dto.response.UserResponse;
 import com.example.devso.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "User", description = "사용자 API")
 @RestController
@@ -33,6 +36,17 @@ public class UserController {
         return userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ADMIN") || a.getAuthority().equals("ROLE_ADMIN"));
     }
+
+    @Operation(summary = "사용자 검색")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(
+            @Parameter(description = "검색어") @RequestParam("q") String query,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        List<UserResponse> response = userService.searchUsers(query, userDetails.getId());
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @Operation(summary = "프로필 조회")
     @GetMapping("/{username}")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(

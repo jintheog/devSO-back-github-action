@@ -3,12 +3,16 @@ package com.example.devso.service;
 import com.example.devso.dto.request.PasswordChangeRequest;
 import com.example.devso.dto.request.UserUpdateRequest;
 import com.example.devso.dto.response.UserProfileResponse;
+import com.example.devso.dto.response.UserResponse;
 import com.example.devso.entity.User;
 import com.example.devso.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -65,5 +69,12 @@ public class UserService {
 
         String newEncodedPassword = passwordEncoder.encode(newPassword);
         user.updatePassword(newEncodedPassword);
+    }
+
+    public List<UserResponse> searchUsers(String query, Long excludeUserId) {
+        List<User> users = userRepository.searchUsers(query, excludeUserId);
+        return users.stream()
+                .map(UserResponse::from)
+                .collect(Collectors.toList());
     }
 }
