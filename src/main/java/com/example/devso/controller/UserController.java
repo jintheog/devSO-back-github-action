@@ -1,8 +1,8 @@
 package com.example.devso.controller;
 
+import com.example.devso.dto.request.ProfileUpdateRequest;
 import com.example.devso.security.CustomUserDetails;
 import com.example.devso.dto.request.PasswordChangeRequest;
-import com.example.devso.dto.request.UserUpdateRequest;
 import com.example.devso.dto.response.ApiResponse;
 import com.example.devso.dto.response.UserProfileResponse;
 import com.example.devso.dto.response.UserResponse;
@@ -12,8 +12,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,40 +47,6 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @Operation(summary = "프로필 조회")
-    @GetMapping("/{username}")
-    public ResponseEntity<ApiResponse<UserProfileResponse>> getProfile(
-            @Parameter(description = "조회할 사용자명")
-            @PathVariable String username,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-
-        if (userDetails == null) {
-            throw new IllegalArgumentException("인증 정보가 없습니다. (토큰 확인 필요)");
-        }
-
-        if (!isAdmin(userDetails) && !userDetails.getUsername().equals(username)) {
-            throw new IllegalArgumentException("다른 사용자의 프로필을 조회할 권한이 없습니다.");
-        }
-        UserProfileResponse response = userService.getProfile(username);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @Operation(summary = "프로필 수정")
-    @PutMapping("/{username}")
-    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(
-            @Parameter(description = "사용자명")
-            @PathVariable String username,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody UserUpdateRequest request
-    ) {
-        if (!isAdmin(userDetails) && !userDetails.getUsername().equals(username)) {
-            throw new AccessDeniedException("다른 사용자의 프로필을 수정할 권한이 없습니다.");
-        }
-
-        UserProfileResponse response = userService.updateProfile(username, userDetails.getId(), request);
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
 
 
     @Operation(summary = "비밀번호 변경")
@@ -93,6 +59,44 @@ public class UserController {
         userService.changePassword(username, request);
 
         return ResponseEntity.noContent().build();
+    }
+
+
+    /**
+     * 프로필 조회 (username 기준)
+     * GET /api/users/{username}
+     */
+    @Operation(summary = "프로필 검색")
+    @GetMapping("/{username}")
+    public ResponseEntity<UserProfileResponse> getProfile(@PathVariable String username) {
+        // ID가 아닌 username으로 조회하는 서비스 로직 호출
+        UserProfileResponse response = userService.getUserProfileByUsername(username);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 프로필 업데이트 (username 기준)
+     * PUT /api/users/{username}
+     */
+    @Operation(summary = "프로필 업데이트")
+    @PutMapping("/{username}")
+    public ResponseEntity<String> updateProfile(
+            @PathVariable String username,
+            @RequestBody ProfileUpdateRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        // 1. 로그인 여부 확인 (시큐리티 설정으로 대체 가능)
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // 2. 경로의 username과 로그인한 유저의 username이 일치하는지 검증 (보안)
+        if (!userDetails.getUsername().equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("자신의 프로필만 수정할 수 있습니다.");
+        }
+
+        userService.updateFullProfileByUsername(username, request);
+        return ResponseEntity.ok("프로필이 성공적으로 수정되었습니다.");
     }
 
 

@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -45,7 +48,6 @@ public class User extends BaseEntity{
 
     private String providerId;
 
-
     @Builder
     public User(Long id, String username, String password, String name, Role role, String phone, String bio,
                 String email, String profileImageUrl, String portfolio, AuthProvider provider, String providerId) {
@@ -63,13 +65,79 @@ public class User extends BaseEntity{
         this.providerId = providerId;
     }
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Career> careers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Education> educations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Certi> certis = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Activity> activities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Skill> skills = new ArrayList<>();
+
+    // --- 업데이트 메서드 ---
+    public void updateProfile(String name, String bio, String profileImageUrl, String portfolio, String phone) {
+        this.name = name; // 이름 수정 기능 추가
+        this.bio = bio;
+        this.profileImageUrl = profileImageUrl;
+        this.portfolio = portfolio;
+        this.phone = phone;
+    }
 
 
-    public void updateProfile(String name, String bio, String profileImageUrl, String portfolio) {
-        if (name != null) this.name = name;
-        if (bio != null) this.bio = bio;
-        if (profileImageUrl != null) this.profileImageUrl = profileImageUrl;
-        if (portfolio != null) this.portfolio = portfolio;
+    public void updateCareers(List<Career> newCareers) {
+        this.careers.clear();
+        if (newCareers != null) {
+            newCareers.forEach(c -> {
+                c.setUser(this);
+                this.careers.add(c);
+            });
+        }
+    }
+
+    public void updateEducations(List<Education> newEducations) {
+        this.educations.clear();
+        if (newEducations != null) {
+            newEducations.forEach(ed -> {
+                ed.setUser(this);
+                this.educations.add(ed);
+            });
+        }
+    }
+
+    public void updateCertis(List<Certi> newCertis) {
+        this.certis.clear();
+        if (newCertis != null) {
+            newCertis.forEach(c -> {
+                c.setUser(this);
+                this.certis.add(c);
+            });
+        }
+    }
+
+    public void updateActivities(List<Activity> newActivities) {
+        this.activities.clear();
+        if (newActivities != null) {
+            newActivities.forEach(a -> {
+                a.setUser(this);
+                this.activities.add(a);
+            });
+        }
+    }
+
+    public void updateSkills(List<Skill> newSkills) {
+        this.skills.clear();
+        if (newSkills != null) {
+            newSkills.forEach(s -> {
+                s.setUser(this);
+                this.skills.add(s);
+            });
+        }
     }
 
     public void updateOauthProfile(String name, String profileImageUrl) {
