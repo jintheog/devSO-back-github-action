@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class RecruitCommentRequest {
-    @NotBlank(message = "댓글 내용을 입력해 주세요.")
-    @Size(max = 200, message = "댓글은 200자 이하로 작성해 주세요.")
+    @NotBlank(message = "댓글 내용을 입력해주세요.")
+    @Size(max = 100, message = "댓글은 100자 이하여야 합니다.")
     private String content;
+
+    // 대댓글 작성을 위한 부모 댓글 ID(일반 댓글: null, 답글: 부모 댓글 ID)
+    private Long parentId;
 }

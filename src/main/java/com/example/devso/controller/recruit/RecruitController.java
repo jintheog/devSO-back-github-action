@@ -107,29 +107,34 @@ public class RecruitController {
         return ResponseEntity.ok(ApiResponse.success(newStatus));
     }
 
-    //댓글 생성
+
+    // RecruitComment
+    @Operation(summary = "댓글 및 대댓글 생성")
     @PostMapping("/{id}/comments")
     public ResponseEntity<ApiResponse<RecruitCommentResponse>> createComment(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody RecruitCommentRequest request
     ){
-        RecruitCommentResponse response = recruitCommentService.create(id,userDetails.getId(), request);
-        return  ResponseEntity.status(HttpStatus.CREATED)
+        // parentId는 request 객체 안에 담겨서 전달됨
+        RecruitCommentResponse response = recruitCommentService.create(id, userDetails.getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response));
     }
 
-    //특정 게시물의 댓글 목록
+    @Operation(summary = "특정 게시물의 댓글 목록 조회 (계층 구조)")
     @GetMapping("/{id}/comments")
     public ResponseEntity<ApiResponse<List<RecruitCommentResponse>>> getComments(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        List<RecruitCommentResponse> comments = recruitCommentService.findByRecruitId(id, userDetails.getId());
+        Long currentUserId = userDetails != null ? userDetails.getId() : null;
+        // 서비스에서 최상위 댓글만 필터링하여 자식들을 포함한 리스트 반환
+        List<RecruitCommentResponse> comments = recruitCommentService.findByRecruitId(id, currentUserId);
         return ResponseEntity.ok(ApiResponse.success(comments));
     }
 
-    //댓글 수정
+    @Operation(summary = "댓글 수정")
     @PutMapping("/{id}/comments/{commentId}")
     public ResponseEntity<ApiResponse<RecruitCommentResponse>> updateComment(
             @PathVariable Long commentId,
@@ -140,7 +145,7 @@ public class RecruitController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    // 댓글 삭제
+    @Operation(summary = "댓글 삭제 (논리 삭제)")
     @DeleteMapping("/{id}/comments/{commentId}")
     public ResponseEntity<Void> deleteComments(
             @PathVariable Long commentId,
