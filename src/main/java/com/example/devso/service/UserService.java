@@ -43,11 +43,12 @@ public class UserService {
 
         // 1. 기본 프로필 정보 업데이트
         user.updateProfile(
+                request.getName(),
                 request.getBio(),
                 request.getProfileImageUrl(),
                 request.getPortfolio(),
-                request.getName(),
-                request.getPhone()
+                request.getPhone(),
+                request.getEmail()
         );
 
         // 2. 경력 사항 업데이트 (List)
@@ -100,11 +101,12 @@ public class UserService {
         }
 
         user.updateProfile(
+                request.getName(),
                 request.getBio(),
                 request.getProfileImageUrl(),
                 request.getPortfolio(),
-                request.getName(),
-                request.getPhone()
+                request.getPhone(),
+                request.getEmail()
         );
 
         return UserProfileResponse.from(user);

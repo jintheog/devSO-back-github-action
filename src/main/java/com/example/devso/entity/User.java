@@ -36,7 +36,7 @@ public class User extends BaseEntity{
     @Column(length = 500)
     private String bio;
 
-
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String profileImageUrl;
@@ -81,12 +81,13 @@ public class User extends BaseEntity{
     private List<Skill> skills = new ArrayList<>();
 
     // --- 업데이트 메서드 ---
-    public void updateProfile(String name, String bio, String profileImageUrl, String portfolio, String phone) {
+    public void updateProfile(String name, String bio, String profileImageUrl, String portfolio, String phone, String email) {
         this.name = name; // 이름 수정 기능 추가
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
         this.portfolio = portfolio;
         this.phone = phone;
+        this.email = email;
     }
 
 

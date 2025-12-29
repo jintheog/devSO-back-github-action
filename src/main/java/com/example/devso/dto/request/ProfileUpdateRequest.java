@@ -17,6 +17,7 @@ public class ProfileUpdateRequest {
     private String profileImageUrl;
     private String portfolio;
     private String phone; // 추가됨
+    private String email;
 
     // 2. 이력 리스트 수정 필드
     private List<CareerUpdateDto> careers;
