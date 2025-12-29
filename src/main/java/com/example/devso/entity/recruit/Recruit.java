@@ -89,7 +89,7 @@ public class Recruit extends BaseEntity {
     private long viewCount = 0;
 
     @Column(nullable = false)
-    private int commentCount = 0;
+    private long commentCount = 0;
 
     //Todo : cascade = CascadeType.REMOVE 추후 배치를 통한 물리 삭제 예정
     @OneToMany(mappedBy = "recruit")

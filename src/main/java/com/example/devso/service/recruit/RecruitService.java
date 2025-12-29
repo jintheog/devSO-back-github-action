@@ -158,6 +158,10 @@ public class RecruitService {
                 ? null
                 : RecruitPosition.fromValue(cond.getPosition());
 
+        RecruitProgressType progressType = (cond.getProgressType() == null)
+                ? null
+                : RecruitProgressType.fromValue(cond.getProgressType());
+
         // 2. 검색어 정제 (빈 문자열 처리)
         String searchKeyword = (cond.getSearch() == null || cond.getSearch().trim().isEmpty())
                 ? null
@@ -175,6 +179,7 @@ public class RecruitService {
                 searchKeyword,
                 stacks,
                 position,
+                progressType,
                 cond.isOnlyOpen()
         );
 

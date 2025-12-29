@@ -1,9 +1,6 @@
 package com.example.devso.repository.recruit;
 
-import com.example.devso.entity.recruit.Recruit;
-import com.example.devso.entity.recruit.RecruitPosition;
-import com.example.devso.entity.recruit.RecruitType;
-import com.example.devso.entity.recruit.TechStack;
+import com.example.devso.entity.recruit.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,6 +30,7 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
           AND (:search IS NULL OR :search = '' OR r.title LIKE %:search%)
           AND (:stacks IS NULL OR s IN :stacks)
           AND (:position IS NULL OR p = :position)
+          AND (:progressType IS NULL OR r.progressType = :progressType)
           AND (:onlyOpen = false OR r.deadLine >= CURRENT_DATE)
         ORDER BY r.createdAt DESC
     """)
@@ -41,5 +39,6 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
             @Param("search") String search,
             @Param("stacks") List<TechStack> stacks,
             @Param("position") RecruitPosition position,
+            @Param("progressType") RecruitProgressType progressType,
             @Param("onlyOpen") boolean onlyOpen);
 }
