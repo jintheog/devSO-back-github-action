@@ -27,7 +27,7 @@ public enum ErrorCode {
 
     // Comment
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다"),
-    NOT_COMMENT_OWNER(HttpStatus.FORBIDDEN, "NOT_COMMENT_OWNER", "댓글 작성자만 삭제할 수 있습니다"),
+    NOT_COMMENT_OWNER(HttpStatus.FORBIDDEN, "NOT_COMMENT_OWNER", "댓글 작성자만 수정/삭제할 수 있습니다"),
 
     // Like
     ALREADY_LIKED(HttpStatus.CONFLICT, "ALREADY_LIKED", "이미 좋아요한 게시물입니다"),

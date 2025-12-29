@@ -1,6 +1,7 @@
 package com.example.devso.controller;
 
 import com.example.devso.dto.request.CommentCreateRequest;
+import com.example.devso.dto.request.CommentUpdateRequest;
 import com.example.devso.dto.request.PostCreateRequest;
 import com.example.devso.dto.request.PostUpdateRequest;
 import com.example.devso.dto.response.ApiResponse;
@@ -183,11 +184,23 @@ public class PostController {
 
     @DeleteMapping("/{id}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @PathVariable Long commentId,
+            @PathVariable("id") Long id,
+            @PathVariable("commentId") Long commentId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         commentService.delete(commentId, userDetails.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/comments/{commentId}")
+    public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
+            @PathVariable("id") Long id,
+            @PathVariable("commentId") Long commentId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody CommentUpdateRequest request
+    ) {
+        CommentResponse response = commentService.update(id, commentId, userDetails.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping("/{id}/like")

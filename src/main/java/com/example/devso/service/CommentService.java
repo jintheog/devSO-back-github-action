@@ -2,6 +2,7 @@ package com.example.devso.service;
 
 
 import com.example.devso.dto.request.CommentCreateRequest;
+import com.example.devso.dto.request.CommentUpdateRequest;
 import com.example.devso.dto.response.CommentResponse;
 import com.example.devso.entity.Comment;
 import com.example.devso.entity.Post;
@@ -70,6 +71,28 @@ public class CommentService {
 
         comment.markDeleted();
         commentRepository.save(comment);
+    }
+
+    @Transactional
+    public CommentResponse update(Long postId, Long commentId, Long userId, CommentUpdateRequest request) {
+        Comment comment = commentRepository.findByIdAndDeletedAtIsNull(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+
+        if (comment.getPost() == null || comment.getPost().getDeletedAt() != null) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+        }
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.NOT_COMMENT_OWNER);
+        }
+
+        comment.updateContent(request.getContent());
+        Comment saved = commentRepository.save(comment);
+        return CommentResponse.from(saved);
     }
 
 
