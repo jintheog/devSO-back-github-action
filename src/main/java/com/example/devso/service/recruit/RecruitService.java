@@ -11,6 +11,8 @@ import com.example.devso.repository.recruit.RecruitBookMarkRepository;
 import com.example.devso.repository.recruit.RecruitRepository;
 import com.example.devso.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -146,76 +148,32 @@ public class RecruitService {
     }
 
     @Transactional(readOnly = true)
-    public List<RecruitResponse> getFilteredRecruits(Long currentUserId, RecruitSearchRequest cond) {
+    public Page<RecruitResponse> getFilteredRecruits(Long currentUserId, RecruitSearchRequest cond, Pageable pageable) {
 
-        // 1. Integer 파라미터를 Enum으로 변환 (방어 로직 추가)
-        // 값이 없거나 0(전체)인 경우 null을 할당하여 쿼리에서 무시되도록 합니다.
-        RecruitType type = (cond.getType() == null || cond.getType() == 0)
-                ? null
-                : RecruitType.fromValue(cond.getType());
+        // 1. 파라미터 변환 (기존 로직 유지)
+        RecruitType type = (cond.getType() == null || cond.getType() == 0) ? null : RecruitType.fromValue(cond.getType());
+        RecruitPosition position = (cond.getPosition() == null || cond.getPosition() == 0) ? null : RecruitPosition.fromValue(cond.getPosition());
+        RecruitProgressType progressType = (cond.getProgressType() == null) ? null : RecruitProgressType.fromValue(cond.getProgressType());
+        String searchKeyword = (cond.getSearch() == null || cond.getSearch().trim().isEmpty()) ? null : cond.getSearch();
+        List<TechStack> stacks = (cond.getStacks() == null || cond.getStacks().isEmpty()) ? null : cond.getStacks().stream().map(TechStack::fromValue).toList();
 
-        RecruitPosition position = (cond.getPosition() == null || cond.getPosition() == 0)
-                ? null
-                : RecruitPosition.fromValue(cond.getPosition());
-
-        RecruitProgressType progressType = (cond.getProgressType() == null)
-                ? null
-                : RecruitProgressType.fromValue(cond.getProgressType());
-
-        // 2. 검색어 정제 (빈 문자열 처리)
-        String searchKeyword = (cond.getSearch() == null || cond.getSearch().trim().isEmpty())
-                ? null
-                : cond.getSearch();
-
-        // 3. 스택 리스트 변환
-        List<TechStack> stacks = (cond.getStacks() == null || cond.getStacks().isEmpty())
-                ? null
-                : cond.getStacks().stream().map(TechStack::fromValue).toList();
-
-        // 4. JPQL 호출 (1차 필터링)
-        // Repository의 쿼리에서 :type IS NULL 조건을 타게 되어 전체 조회가 가능해집니다.
-        List<Recruit> recruits = recruitRepository.findRecruitsByFilters(
-                type,
-                searchKeyword,
-                stacks,
-                position,
-                progressType,
-                cond.isOnlyOpen()
+        // 2. DB 호출 (필터 조건 전달)
+        // 여기서 Page 객체를 반환받으므로 전체 개수(totalElements) 정보가 포함됩니다.
+        Page<Recruit> recruitPage = recruitRepository.findRecruitsByFilters(
+                type, searchKeyword, stacks, position, progressType,
+                cond.isOnlyOpen(), cond.isOnlyBookmarked(), cond.isOnlyMyRecruits(),
+                currentUserId, cond.getCurrentUsername(), pageable
         );
 
-        // 데이터가 없으면 즉시 반환
-        if (recruits.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 5. 북마크 여부 일괄 조회 (로그인한 경우에만 수행)
+        // 3. 북마크 여부 확인
         Set<Long> bookmarkedIds = new HashSet<>();
-        if (currentUserId != null) {
-            List<Long> recruitIds = recruits.stream().map(Recruit::getId).toList();
-            bookmarkedIds.addAll(
-                    recruitBookMarkRepository.findRecruitIdsByUserIdAndRecruitIds(currentUserId, recruitIds)
-            );
+        if (currentUserId != null && !recruitPage.isEmpty()) {
+            List<Long> ids = recruitPage.getContent().stream().map(Recruit::getId).toList();
+            bookmarkedIds.addAll(recruitBookMarkRepository.findRecruitIdsByUserIdAndRecruitIds(currentUserId, ids));
         }
 
-        // 6. 최종 DTO 변환 및 '관심 목록/내 글' 필터링 (2차 필터링)
-        return recruits.stream()
-                .map(r -> RecruitResponse.from(r, bookmarkedIds.contains(r.getId())))
-                .filter(res -> {
-                    // 관심 목록 필터: 선택되었을 때 북마크가 안 된 글은 제외
-                    if (cond.isOnlyBookmarked() && !res.isBookmarked()) {
-                        return false;
-                    }
-
-                    // 내 모집글 필터: 선택되었을 때 작성자명이 다르면 제외
-                    if (cond.isOnlyMyRecruits()) {
-                        if (cond.getCurrentUsername() == null || !res.getUsername().equals(cond.getCurrentUsername())) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                })
-                .collect(Collectors.toList());
+        // 4. Page<Entity> -> Page<DTO> 변환 (페이지 정보 유지됨)
+        return recruitPage.map(r -> RecruitResponse.from(r, bookmarkedIds.contains(r.getId())));
     }
 
 }

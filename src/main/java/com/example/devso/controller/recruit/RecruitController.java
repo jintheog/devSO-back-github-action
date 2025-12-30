@@ -16,6 +16,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -108,21 +112,23 @@ public class RecruitController {
         return ResponseEntity.ok(ApiResponse.success(newStatus));
     }
 
-    @Operation(summary = "모집글 필터링 조회 (필터 및 검색 포함")
+    @Operation(summary = "모집글 필터링 조회 (필터 및 검색 포함)")
     @GetMapping
-    public ResponseEntity<List<RecruitResponse>> getRecruits(
+    public ResponseEntity<ApiResponse<Page<RecruitResponse>>> getRecruits(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            RecruitSearchRequest searchRequest) {
+            RecruitSearchRequest searchRequest,
+            @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Long userId = (userDetails != null) ? userDetails.getId() : null;
 
-        // 검색 조건에 현재 유저명 세팅 (내가 쓴 글 필터링용)
+        // 내가 쓴 글 필터링용 유저명 세팅
         if (userDetails != null) {
             searchRequest.setCurrentUsername(userDetails.getUsername());
         }
 
-        List<RecruitResponse> responses = recruitService.getFilteredRecruits(userId, searchRequest);
-        return ResponseEntity.ok(responses);
+        Page<RecruitResponse> responses = recruitService.getFilteredRecruits(userId, searchRequest, pageable);
+
+        return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
 
