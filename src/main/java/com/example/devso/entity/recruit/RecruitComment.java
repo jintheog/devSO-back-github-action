@@ -1,6 +1,5 @@
 package com.example.devso.entity.recruit;
 
-import com.example.devso.dto.request.recruit.RecruitRequest;
 import com.example.devso.entity.BaseEntity;
 import com.example.devso.entity.User;
 import jakarta.persistence.*;
@@ -40,7 +39,7 @@ public class RecruitComment extends BaseEntity {
     private RecruitComment parent;
 
     //  2. 부모 댓글 입장에서 자식들을 조회하기 위한 리스트
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecruitComment> children = new ArrayList<>();
 
     // ===== 생성 =====
@@ -49,12 +48,19 @@ public class RecruitComment extends BaseEntity {
         comment.content = content;
         comment.user = user;
         comment.recruit = recruit;
-        comment.parent = parent; // 🌟 전달받은 부모 댓글을 설정
+        if(parent != null){
+            comment.setParent(parent);
+        }
         return comment;
     }
 
     // ===== 수정 =====
     public void update(String content) {
         this.content = content;
+    }
+
+    private void setParent(RecruitComment parent) {
+        this.parent = parent;
+        parent.getChildren().add(this); // 부모의 children 리스트에도 즉시 추가
     }
 }

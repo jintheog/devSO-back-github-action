@@ -24,6 +24,7 @@ public class RecruitResponse {
     private RecruitProgressType progressType;
     private List<StackResponse> stacks;
     private String username;
+    private String profileImageUrl;
     private RecruitDuration duration;          // 진행 기간
     private RecruitContactMethod contactMethod; // 연락 방법
     private String contactInfo;                // 실제 이메일/링크/전화번호
@@ -64,6 +65,7 @@ public class RecruitResponse {
                 .createdAt(recruit.getCreatedAt())
                 .updatedAt(recruit.getUpdatedAt())
                 .username(recruit.getUser().getUsername())
+                .profileImageUrl(recruit.getUser().getProfileImageUrl())
                 .deadLine(recruit.getDeadLine())
                 .bookmarked(bookmarked)
                 .viewCount(recruit.getViewCount())

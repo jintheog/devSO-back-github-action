@@ -91,11 +91,12 @@ public class Recruit extends BaseEntity {
     @Column(nullable = false)
     private long commentCount = 0;
 
-    //Todo : cascade = CascadeType.REMOVE 추후 배치를 통한 물리 삭제 예정
-    @OneToMany(mappedBy = "recruit")
+    // 팀원 모집 게시글 삭제 시 댓글들도 삭제(deleted_at에 삭제일 추가)
+    @OneToMany(mappedBy = "recruit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecruitComment> recruitComments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "recruit")
+    // 북마크 역시 게시글 삭제 시 함께 삭제(deleted_at에 삭제일 추가)
+    @OneToMany(mappedBy = "recruit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecruitBookMark> recruitBookMarks = new ArrayList<>();
 
     // ===== 생성 =====
@@ -163,10 +164,12 @@ public class Recruit extends BaseEntity {
         this.commentCount++;
     }
 
-    // ===== 댓글 수 감소 =====
-    public void decreaseCommentCount() {
-        if (this.commentCount > 0) {
-            this.commentCount--;
+    // ===== 댓글 수 감소(부모 댓글 삭제 시 하위 자식 댓글들 모두 삭제) =====
+    public void decreaseCommentCountBy(long amount) {
+        if (this.commentCount >= amount) {
+            this.commentCount -= amount;
+        } else {
+            this.commentCount = 0; // 마이너스 방지
         }
     }
 

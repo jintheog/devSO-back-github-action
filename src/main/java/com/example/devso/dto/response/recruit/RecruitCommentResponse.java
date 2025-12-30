@@ -1,6 +1,5 @@
 package com.example.devso.dto.response.recruit;
 
-import com.example.devso.dto.response.UserResponse;
 import com.example.devso.entity.recruit.RecruitComment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 public class RecruitCommentResponse {
     private Long id;
     private String content;
-    private UserResponse author;
+    private RecruitUserResponse author;
     private LocalDateTime createdAt;
 
     @JsonProperty("isOwner")
@@ -36,7 +35,7 @@ public class RecruitCommentResponse {
         return RecruitCommentResponse.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
-                .author(UserResponse.from(comment.getUser()))
+                .author(RecruitUserResponse.from(comment.getUser()))
                 .createdAt(comment.getCreatedAt())
                 .isOwner(comment.getUser().getId().equals(currentUserId))
                 .parentId(comment.getParent() != null ? comment.getParent().getId() : null)

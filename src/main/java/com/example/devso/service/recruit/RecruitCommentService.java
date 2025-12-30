@@ -95,7 +95,9 @@ public class RecruitCommentService {
             throw new CustomException(ErrorCode.NOT_COMMENT_OWNER);
         }
 
-        comment.getRecruit().decreaseCommentCount();
+        // 본인 + 자식 댓글들의 수
+        int totalToDelete = 1 + comment.getChildren().size();
+        comment.getRecruit().decreaseCommentCountBy(totalToDelete);
         recruitCommentRepository.delete(comment);
     }
 }
