@@ -4,12 +4,15 @@ import com.example.devso.dto.request.recruit.RecruitCommentRequest;
 import com.example.devso.dto.request.recruit.RecruitSearchRequest;
 import com.example.devso.dto.response.recruit.RecruitCommentResponse;
 import com.example.devso.dto.response.recruit.StackResponse;
+import com.example.devso.exception.CustomException;
+import com.example.devso.exception.ErrorCode;
 import com.example.devso.security.CustomUserDetails;
 import com.example.devso.dto.request.recruit.RecruitRequest;
 import com.example.devso.dto.response.ApiResponse;
 import com.example.devso.dto.response.recruit.EnumResponse;
 import com.example.devso.dto.response.recruit.RecruitResponse;
 import com.example.devso.entity.recruit.*;
+import com.example.devso.service.recruit.GeminiService;
 import com.example.devso.service.recruit.RecruitCommentService;
 import com.example.devso.service.recruit.RecruitService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +38,7 @@ import java.util.List;
 public class RecruitController {
     private final RecruitService recruitService;
     private final RecruitCommentService recruitCommentService;
+    private final GeminiService geminiService;
 
     @Operation(summary = "모집글 생성")
     @PostMapping
@@ -177,6 +181,38 @@ public class RecruitController {
     ){
         recruitCommentService.delete(commentId, userDetails.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "AI 자가진단 체크리스트 생성 및 조회")
+    @GetMapping("/{id}/ai-checklist")
+    public ResponseEntity<ApiResponse<String>> getAiChecklist(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(value = "refresh", defaultValue = "false") boolean refresh
+    ) {
+        if (userDetails == null) {
+            throw new CustomException(ErrorCode.AI_UNAUTHORIZED_ACCESS);
+        }
+
+        String jsonResult = geminiService.getOrGenerateChecklist(id, userDetails.getId(), refresh);
+        return ResponseEntity.ok(ApiResponse.success(jsonResult));
+    }
+
+    @Operation(summary = "AI 자가진단 점수 계산 및 결과 저장")
+    @PostMapping("/{id}/ai-checklist/score")
+    public ResponseEntity<ApiResponse<String>> calculateAiScore(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody List<String> checkedQuestions
+    ) {
+        if (userDetails == null) {
+            throw new CustomException(ErrorCode.AI_UNAUTHORIZED_ACCESS);
+        }
+
+        // 반환 타입을 ApiResponse<Integer>에서 ApiResponse<String>으로 변경했습니다.
+        String resultJson = geminiService.calculateAndSaveScore(id, userDetails.getId(), checkedQuestions);
+
+        return ResponseEntity.ok(ApiResponse.success(resultJson));
     }
 
 

@@ -1,13 +1,14 @@
 package com.example.devso.repository.recruit;
 
-import com.example.devso.entity.Comment;
 import com.example.devso.entity.recruit.RecruitComment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface RecruitCommentRepository extends JpaRepository<RecruitComment, Long> {
     // 특정 게시물의 댓글 목록
     // join fetch를 통해 작성자(User)와 부모 댓글 정보를 한 번에 가져옵니다.

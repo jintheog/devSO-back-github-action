@@ -49,7 +49,13 @@ public enum ErrorCode {
     //Recruit
     RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND, "RECRUIT_NOT_FOUND", "팀원 모집글을 찾을 수 없습니다"),
     NOT_RECRUIT_OWNER(HttpStatus.FORBIDDEN, "NOT_RECRUIT_OWNER", "본인의 팀원 모집글만 수정할 수 있습니다"),
-    INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "INVALID_ENUM_VALUE", "올바르지 않은 enum 값입니다");
+    INVALID_ENUM_VALUE(HttpStatus.BAD_REQUEST, "INVALID_ENUM_VALUE", "올바르지 않은 enum 값입니다"),
+
+    // AI
+    AI_ANALYSIS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI_001", "AI 분석 중 오류가 발생했습니다"),
+    AI_PROMPT_ERROR(HttpStatus.BAD_REQUEST, "AI_002", "분석을 위한 모집글 정보가 부족합니다"),
+    AI_UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "AI_AUTH_001", "AI 사용 시 인증이 필요한 서비스입니다"),
+    CHECKLIST_NOT_FOUND(HttpStatus.NOT_FOUND, "AI_003", "해당 공고에 대한 생성된 체크리스트가 없습니다");
 
     private final HttpStatus status;
     private final String code;
