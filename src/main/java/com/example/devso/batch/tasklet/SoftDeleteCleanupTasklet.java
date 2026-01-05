@@ -21,8 +21,7 @@ public class SoftDeleteCleanupTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         // Find all tables with 'deleted_at' column in the current database
-        String schemaQuery = "SELECT DATABASE()";
-        String currentSchema = jdbcTemplate.queryForObject(schemaQuery, String.class);
+        String targetDB = "devso";
 
         String findTablesQuery = """
             SELECT TABLE_NAME 
@@ -31,7 +30,7 @@ public class SoftDeleteCleanupTasklet implements Tasklet {
             AND COLUMN_NAME = 'deleted_at'
         """;
 
-        List<String> tables = jdbcTemplate.queryForList(findTablesQuery, String.class, currentSchema);
+        List<String> tables = jdbcTemplate.queryForList(findTablesQuery, String.class, targetDB);
 
         if (tables != null) {
             for (String table : tables) {

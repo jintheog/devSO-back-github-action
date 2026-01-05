@@ -17,31 +17,27 @@ public class CleanupScheduler {
     private final JobLauncher jobLauncher;
     private final Job cleanupDeletedRowsJob;
 
-    @Value("${cleanup.execution-date}")
-    private String executionDate;
-
     public CleanupScheduler(JobLauncher jobLauncher, Job cleanupDeletedRowsJob) {
         this.jobLauncher = jobLauncher;
         this.cleanupDeletedRowsJob = cleanupDeletedRowsJob;
     }
 
-    // Run every day at midnight to check if it's the target date
-    @Scheduled(cron = "0 29 10 * * *", zone = "Asia/Seoul")
+    //매월 6일 12시에
+//    @Scheduled(cron = "0 0 12 6 * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0/5 * * * ?", zone = "Asia/Seoul") // 5분마다
     public void runCleanupJob() {
         LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Seoul"));
-        LocalDate targetDate = LocalDate.parse(executionDate, DateTimeFormatter.ISO_LOCAL_DATE);
 
-        if (today.isEqual(targetDate)) {
-            try {
-                JobParameters jobParameters = new JobParametersBuilder()
-                        .addLong("time", System.currentTimeMillis())
-                        .toJobParameters();
-                jobLauncher.run(cleanupDeletedRowsJob, jobParameters);
-                System.out.println("Cleanup job executed for date: " + today);
-            } catch (Exception e) {
-                System.err.println("Failed to execute cleanup job: " + e.getMessage());
-                e.printStackTrace();
-            }
+        try {
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addLong("time", System.currentTimeMillis())
+                    .toJobParameters();
+            jobLauncher.run(cleanupDeletedRowsJob, jobParameters);
+            System.out.println("Cleanup job executed for date: " + today);
+        } catch (Exception e) {
+            System.err.println("Failed to execute cleanup job: " + e.getMessage());
+            e.printStackTrace();
         }
+
     }
 }
