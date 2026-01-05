@@ -10,6 +10,7 @@ import com.example.devso.repository.FollowRepository;
 import com.example.devso.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.engine.jdbc.Size;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,35 +71,35 @@ public class UserService {
         );
 
         // 하위 리스트 업데이트 로직
-        if (request.getCareers() != null) {
+        if (request.getCareers() != null || request.getCareers().size() != 0) {
             List<Career> newCareers = request.getCareers().stream()
                     .map(dto -> dto.toEntity(user))
                     .toList();
             user.updateCareers(newCareers);
         }
 
-        if (request.getEducations() != null) {
+        if (request.getEducations() != null || request.getEducations().size() != 0) {
             List<Education> newEducations = request.getEducations().stream()
                     .map(dto -> dto.toEntity(user))
                     .toList();
             user.updateEducations(newEducations);
         }
 
-        if (request.getActivities() != null) {
+        if (request.getActivities() != null || request.getActivities().size() != 0) {
             List<Activity> newActivities = request.getActivities().stream()
                     .map(dto -> dto.toEntity(user))
                     .toList();
             user.updateActivities(newActivities);
         }
 
-        if (request.getCertis() != null) {
+        if (request.getCertis() != null || request.getCertis().size() != 0) {
             List<Certi> newCerti = request.getCertis().stream()
                     .map(dto -> dto.toEntity(user))
                     .toList();
             user.updateCertis(newCerti);
         }
 
-        if (request.getSkills() != null) {
+        if (request.getSkills() != null || request.getSkills().size() != 0) {
             List<Skill> newSkill = request.getSkills().stream()
                     .map(dto -> dto.toEntity(user))
                     .toList();
