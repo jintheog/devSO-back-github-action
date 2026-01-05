@@ -32,7 +32,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     int incrementViewCount(@Param("id") Long id);
 
     // 특정 사용자의 게시물 조회
-    @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.user.id = :userId AND p.deletedAt IS NULL")
+    @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.user.id = :userId AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
     List<Post> findByUserIdWithUser(@Param("userId") Long userId);
 
     // 사용자별 게시물 수
