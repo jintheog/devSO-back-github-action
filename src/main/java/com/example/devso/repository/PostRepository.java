@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,8 +43,53 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Slice<Post> findAllWithUserPaging(Pageable pageable);
 
     // 피드 (내게시물 + 팔로잉게시물)
-    @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.user.id IN :userIds AND p.deletedAt IS NULL ORDER BY p.createdAt")
+    @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.user.id IN :userIds AND p.deletedAt IS NULL ORDER BY p.createdAt DESC")
     Slice<Post> findByUserIdsWithUserPaging(@Param("userIds") List<Long> userIds, Pageable pageable);
+
+    // 피드(페이지 응답용)
+    @Query(
+            value = "SELECT p FROM Post p JOIN p.user u WHERE p.user.id IN :userIds AND p.deletedAt IS NULL ORDER BY p.createdAt DESC",
+            countQuery = "SELECT COUNT(p) FROM Post p WHERE p.user.id IN :userIds AND p.deletedAt IS NULL"
+    )
+    Page<Post> findByUserIdsPage(@Param("userIds") List<Long> userIds, Pageable pageable);
+
+    // 트렌딩: 최근 24시간 + (좋아요*3 + 댓글*2 + 조회수) 기준 정렬
+    @Query(
+            value = """
+                    SELECT p FROM Post p
+                    LEFT JOIN p.likes l
+                    LEFT JOIN p.comments c WITH c.deletedAt IS NULL
+                    WHERE p.deletedAt IS NULL
+                      AND p.createdAt >= :cutoff
+                    GROUP BY p
+                    ORDER BY (COUNT(DISTINCT l.id) * 3 + COUNT(DISTINCT c.id) * 2 + p.viewCount) DESC,
+                             p.createdAt DESC
+                    """,
+            countQuery = """
+                    SELECT COUNT(p) FROM Post p
+                    WHERE p.deletedAt IS NULL
+                      AND p.createdAt >= :cutoff
+                    """
+    )
+    Page<Post> findTrending(@Param("cutoff") LocalDateTime cutoff, Pageable pageable);
+
+    // 트렌딩(전체 기간): (좋아요*3 + 댓글*2 + 조회수) 기준 정렬
+    @Query(
+            value = """
+                    SELECT p FROM Post p
+                    LEFT JOIN p.likes l
+                    LEFT JOIN p.comments c WITH c.deletedAt IS NULL
+                    WHERE p.deletedAt IS NULL
+                    GROUP BY p
+                    ORDER BY (COUNT(DISTINCT l.id) * 3 + COUNT(DISTINCT c.id) * 2 + p.viewCount) DESC,
+                             p.createdAt DESC
+                    """,
+            countQuery = """
+                    SELECT COUNT(p) FROM Post p
+                    WHERE p.deletedAt IS NULL
+                    """
+    )
+    Page<Post> findTrendingAllTime(Pageable pageable);
 
     Optional<Post> findByIdAndDeletedAtIsNull(Long id);
 

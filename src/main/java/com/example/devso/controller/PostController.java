@@ -66,7 +66,18 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/trending")
+    public ResponseEntity<ApiResponse<Page<PostResponse>>> trending(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Long userId = userDetails != null ? userDetails.getId() : null;
+        Page<PostResponse> posts = postService.findTrending(userId, PageRequest.of(page, size));
+        return ResponseEntity.ok(ApiResponse.success(posts));
+    }
+
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<PostResponse>> findById(@PathVariable Long id,
                                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails != null ? userDetails.getId() : null;
@@ -74,7 +85,7 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PostMapping("/{id}/view")
+    @PostMapping("/{id:\\d+}/view")
     public ResponseEntity<ApiResponse<ViewCountResponse>> recordView(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -145,7 +156,7 @@ public class PostController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<PostResponse>> update(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -155,7 +166,7 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -164,7 +175,7 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/comments")
+    @PostMapping("/{id:\\d+}/comments")
     public ResponseEntity<ApiResponse<CommentResponse>> createComment(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -174,7 +185,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
     }
 
-    @GetMapping("/{id}/comments")
+    @GetMapping("/{id:\\d+}/comments")
     public ResponseEntity<ApiResponse<List<CommentResponse>>> getComments(
             @PathVariable Long id
     ) {
@@ -182,7 +193,7 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @DeleteMapping("/{id}/comments/{commentId}")
+    @DeleteMapping("/{id:\\d+}/comments/{commentId:\\d+}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable("id") Long id,
             @PathVariable("commentId") Long commentId,
@@ -192,7 +203,7 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/comments/{commentId}")
+    @PutMapping("/{id:\\d+}/comments/{commentId:\\d+}")
     public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
             @PathVariable("id") Long id,
             @PathVariable("commentId") Long commentId,
@@ -203,7 +214,7 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PostMapping("/{id}/like")
+    @PostMapping("/{id:\\d+}/like")
     public ResponseEntity<ApiResponse<LikeResponse>> like(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -212,7 +223,7 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @DeleteMapping("/{id}/like")
+    @DeleteMapping("/{id:\\d+}/like")
     public ResponseEntity<ApiResponse<LikeResponse>> unlike(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -222,7 +233,7 @@ public class PostController {
 
     }
 
-    @GetMapping("/{id}/like")
+    @GetMapping("/{id:\\d+}/like")
     public ResponseEntity<ApiResponse<LikeResponse>> getLikeStatus(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails

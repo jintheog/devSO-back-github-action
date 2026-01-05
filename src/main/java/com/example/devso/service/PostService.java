@@ -9,6 +9,7 @@ import com.example.devso.entity.User;
 import com.example.devso.exception.CustomException;
 import com.example.devso.exception.ErrorCode;
 import com.example.devso.repository.CommentRepository;
+import com.example.devso.repository.FollowRepository;
 import com.example.devso.repository.PostLikeRepository;
 import com.example.devso.repository.PostRepository;
 import com.example.devso.repository.PostViewRepository;
@@ -34,6 +35,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final CommentRepository commentRepository;
     private final PostViewRepository postViewRepository;
+    private final FollowRepository followRepository;
 
     @Transactional
     public PostResponse create(Long userId, PostCreateRequest request) {
@@ -55,6 +57,26 @@ public class PostService {
     // 전체 게시물
     public Page<PostResponse> findAll(Long currentUserId, Pageable pageable) {
         Page<Post> posts = postRepository.findAllWithUser(pageable);
+        return posts.map(post -> toPostResponseWithStats(post, currentUserId));
+    }
+
+    // 피드(내 팔로잉 + 내 글)
+    public Page<PostResponse> findFeed(Long currentUserId, Pageable pageable) {
+        if (currentUserId == null) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
+        List<Long> userIds = followRepository.findFollowingIdsByFollowerId(currentUserId);
+        if (!userIds.contains(currentUserId)) userIds.add(currentUserId);
+
+        Page<Post> posts = postRepository.findByUserIdsPage(userIds, pageable);
+        return posts.map(post -> toPostResponseWithStats(post, currentUserId));
+    }
+
+    // 트렌딩(최근 24시간 인기)
+    public Page<PostResponse> findTrending(Long currentUserId, Pageable pageable) {
+        // 트렌딩은 전체 기간 기준으로 고정
+        Page<Post> posts = postRepository.findTrendingAllTime(pageable);
         return posts.map(post -> toPostResponseWithStats(post, currentUserId));
     }
 
