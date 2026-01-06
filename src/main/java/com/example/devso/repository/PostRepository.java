@@ -66,6 +66,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 사용자별 게시물 수
     long countByUserId(Long userId);
 
+    // 특정 시점 이후(삭제되지 않은) 게시물 수
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.deletedAt IS NULL AND p.createdAt >= :since")
+    long countNewSince(@Param("since") LocalDateTime since);
+
     // 탐색
     @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.deletedAt IS NULL ORDER BY p.createdAt DESC")
     Slice<Post> findAllWithUserPaging(Pageable pageable);

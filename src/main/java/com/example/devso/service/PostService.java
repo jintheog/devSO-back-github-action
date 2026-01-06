@@ -21,7 +21,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 
@@ -58,6 +62,16 @@ public class PostService {
     public Page<PostResponse> findAll(Long currentUserId, Pageable pageable) {
         Page<Post> posts = postRepository.findAllWithUser(pageable);
         return posts.map(post -> toPostResponseWithStats(post, currentUserId));
+    }
+
+    // 이번 주(월요일 00:00 기준) 새 게시글 수
+    public long getWeeklyNewPostCount() {
+        ZoneId zone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime now = ZonedDateTime.now(zone);
+        ZonedDateTime startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .toLocalDate()
+                .atStartOfDay(zone);
+        return postRepository.countNewSince(startOfWeek.toLocalDateTime());
     }
 
     // 전체 게시물 검색(제목/내용/작성자)

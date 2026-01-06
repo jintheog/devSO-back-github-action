@@ -78,6 +78,13 @@ public class PostController {
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
+    // 이번 주 새 게시글 수(월요일 00:00 기준)
+    @GetMapping("/weekly-count")
+    public ResponseEntity<ApiResponse<Long>> weeklyCount() {
+        long count = postService.getWeeklyNewPostCount();
+        return ResponseEntity.ok(ApiResponse.success(count));
+    }
+
     @GetMapping("/{id:\\d+}")
     public ResponseEntity<ApiResponse<PostResponse>> findById(@PathVariable Long id,
                                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
