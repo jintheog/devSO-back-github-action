@@ -164,7 +164,7 @@ public class RecruitService {
         Page<Recruit> recruitPage = recruitRepository.findRecruitsByFilters(
                 type, searchKeyword, stacks, position, progressType,
                 cond.isOnlyOpen(), cond.isOnlyBookmarked(), cond.isOnlyMyRecruits(),
-                currentUserId, cond.getCurrentUsername(), pageable
+                currentUserId, cond.getCurrentUsername(), RecruitStatus.OPEN , pageable
         );
 
         // 3. 북마크 여부 확인

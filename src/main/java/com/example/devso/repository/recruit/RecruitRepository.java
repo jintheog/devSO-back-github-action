@@ -37,7 +37,7 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
           AND (:stacks IS NULL OR EXISTS (SELECT 1 FROM r.stacks s WHERE s IN :stacks))
           AND (:position IS NULL OR :position MEMBER OF r.positions)
           AND (:progressType IS NULL OR r.progressType = :progressType)
-          AND (:onlyOpen = false OR r.deadLine >= CURRENT_DATE)
+          AND (:onlyOpen = false OR (r.deadLine >= CURRENT_DATE AND r.status = :openStatus))
           AND (:onlyMyRecruits = false OR u.username = :currentUsername)
           AND (:onlyBookmarked = false OR rb.user.id = :currentUserId)
         """,
@@ -52,7 +52,7 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
                 OR r.user.name LIKE %:search%
               )
           AND (:progressType IS NULL OR r.progressType = :progressType)
-          AND (:onlyOpen = false OR r.deadLine >= CURRENT_DATE)
+          AND (:onlyOpen = false OR (r.deadLine >= CURRENT_DATE AND r.status = :openStatus))
           AND (:onlyMyRecruits = false OR r.user.username = :currentUsername)
           AND (:onlyBookmarked = false OR rb.user.id = :currentUserId)
         """)
@@ -67,5 +67,6 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
             @Param("onlyMyRecruits") boolean onlyMyRecruits,
             @Param("currentUserId") Long currentUserId,
             @Param("currentUsername") String currentUsername,
+            @Param("openStatus") RecruitStatus openStatus,
             Pageable pageable);
 }
