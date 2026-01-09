@@ -50,7 +50,7 @@
 
 본 프로젝트는 **MySQL Workbench**를 통해 설계된 관계형 데이터베이스를 기반으로 합니다.
 
-![alt text](image.png)
+![alt text](erd2.png)
 
 **데이터 모델 설계 핵심:**
 
