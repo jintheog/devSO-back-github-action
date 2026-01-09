@@ -34,6 +34,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         }
 
+        if (path.startsWith("/assets")) {
+            return true;
+        }
+
         return false;
     }
 
